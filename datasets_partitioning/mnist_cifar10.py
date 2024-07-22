@@ -122,12 +122,12 @@ def iid_equal_size_split(data,label,num_parties,flag=None):
         return partitions_1,partitions_2
 # 2.
 """         quantity skew         """                   
-def iid_nequal_size_split(data,label,num_parties,beta=0.9):   #  💡 بتا رو 1 در نظر گرفتم /اگر نیاز شد مقدار بدم                  
+def iid_nequal_size_split(data,label,num_parties,beta=0.9):                    
     
     all_num_samples=len(data)
     partitions=[0]*num_parties
     min_size_of_parties=0
-    while min_size_of_parties<50:                   #برای اینکه صفر نشه سایز هیچ کلاینتی، حداقل سایز مثلا 50
+    while min_size_of_parties<50:                   
         p=np.random.dirichlet(np.repeat(beta,num_parties))          # p.sum()is 1  
         size_parties=np.random.multinomial(all_num_samples, p)       # a array of different sizes for parties
         min_size_of_parties=np.min(size_parties)
@@ -145,7 +145,7 @@ def niid_labeldis_split(data,label,num_clients,flag,beta):     # 💡
     each client has a proportion of the samples of each label(Dirichlet distribution)
     The size of the local data set is not equal
     """ 
-    num_labels=10                  # مقداردهی برچسب
+    num_labels=10                 
     data_size=int(len(data)/num_clients)
     partitions=[0]*num_clients
     partitions_idxs=[[] for _ in range(num_clients)]
@@ -174,13 +174,10 @@ def niid_labeldis_split(data,label,num_clients,flag,beta):     # 💡
             idxs=list(set(idxs)-set(d_idxs)) 
     return partitions
 # 4.
-"""         label distribution skew -->  quantity-based label imbalanced      """     #بهتر از دو تای قبلیه 
+"""         label distribution skew -->  quantity-based label imbalanced      """    
 def k_niid_equal_size_split(train_data,train_label,test_data,test_label,num_parties,labels_list,k,flag=None): 
     
-    """ k: number of lables for each party """
-    # label_lists: ممکن است فقط چند تا برچسب مختلف از کل برچسب ها را داشته باشه به دلیل پارتیشن بندی مرحله دوم روی کلاینت ها
-    # برای تقسیم بندی مرحله دوم،اندیس هاش میشه اندیس متناظر با لیبل که متفاوته با لیبل
-    
+    """ k: number of lables for each party """    
     labels_index=np.arange(len(labels_list))
     times=[0]*len(labels_list) 
     party_labels_list=[] 
@@ -198,7 +195,7 @@ def k_niid_equal_size_split(train_data,train_label,test_data,test_label,num_part
                 z=1
         else:
             if len(zero_list)<k:
-                for idx in zero_list:          # تابع رو برای حالات ممکن که همه لیبل ها در پارتیشن ها باشند نوشتم 
+                for idx in zero_list:           
                     c.append(labels_list[idx])
                     times[idx]+=1
                 rest_labels_list=list(set(labels_index)-set(zero_list))
@@ -279,12 +276,9 @@ def random_edges(num_edges,num_clients):
     return assigned_clients
 
 # 6. 
-#تابع زیر به خاطر اینکه بر اساس مقدار باقی مانده و تعریف یه گام داره لیبل میده تقریبا الگوی ثابتی دارم هر دفعه  
-def k_niid_equal_size_split_1(train_data,train_label,test_data,test_label,num_parties,labels_list,k,flag=None): #اختلاف سایز هست ولی خیل زیاد نه
+def k_niid_equal_size_split_1(train_data,train_label,test_data,test_label,num_parties,labels_list,k,flag=None): 
     
     """ k: number of lables for each party """
-    # label_lists: ممکن است فقط چند تا برچسب مختلف از کل برچسب ها را داشته باشه به دلیل پارتیشن بندی مرحله دوم روی کلاینت ها
-    # برای تقسیم بندی مرحله دوم،اندیس هاش میشه اندیس متناظر با لیبل که متفاوته با لیبل
 
     num_labels=len(labels_list)
     times=[0]*num_labels    
@@ -298,7 +292,7 @@ def k_niid_equal_size_split_1(train_data,train_label,test_data,test_label,num_pa
             d=0
             multiple=1
             while d<diff and j<k:
-                ii=i                                # رو واسه ادامه نیاز دارم پس بدون تغییر بذارمش i
+                ii=i                               
                 idx=(ii%num_labels)+(multiple*num_parties)
                 if idx>len(labels_list)-1:
                     break
