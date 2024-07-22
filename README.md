@@ -1,2 +1,2 @@
 # PHiFL-TL
-implementation of paper "PHiFL-TL: Personalized Hierarchical Federated Learning using Transfer Learning"
+Implementation of the algorithm presented in "PHiFL-TL: Personalized Hierarchical Federated Learning using Transfer Learning"
