@@ -1,2 +1,6 @@
 # PHiFL-TL
 Implementation of the algorithm presented in "PHiFL-TL: Personalized Hierarchical Federated Learning using Transfer Learning"
+
+For running PHiFL with mnist and cnn:
+
+?
