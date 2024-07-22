@@ -26,10 +26,12 @@ class Server:
 # 3.
     def send_to_edgeserver(self,edgeserver): 
         edgeserver.model.set_weights(self.model.get_weights())
-
+        
+# 4.
     def refresh_server(self):                   
         self.buffer.clear() 
-    
+        
+# 5.    
     def edgeserver_registering(self,edgeserver):           
         sample_num=[]
         for i in edgeserver.participated_sample.values():
@@ -37,6 +39,6 @@ class Server:
         all_sample_num=sum(sample_num)
         #self.participated_name.append(edgeserver.name)      
         self.participated_sample[edgeserver.name] = all_sample_num
-        
+#6.    
     def m_compile(self,loss,optimizer,metrics):
         self.model.compile(loss=loss,optimizer=optimizer,metrics=metrics)
