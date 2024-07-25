@@ -76,7 +76,9 @@ def plot_cifar10(idx):
     ax = fig.add_subplot(111)
     ax.imshow(image,interpolation='bicubic')
     ax.set_title('Category ={}'.format(label_names[Y[idx]]),fontsize =15)
-
+    
+#                                   Partitioning Functions            
+# =============================================================================================================
 # 1.
 def iid_equal_size_split(train_data,train_label,test_data,test_label,num_parties):  
     train_size=int(len(train_data)/num_parties)
