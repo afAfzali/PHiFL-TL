@@ -87,33 +87,41 @@ def iid_equal_size_split(train_data,train_label,test_data,test_label,num_parties
     test_size=int(len(test_data)/num_parties)             
     test_partitions=[0]*num_parties
     test_idx=list(range(len(test_data)))
+    
     for i in range(num_parties):
         indxs=np.random.choice(train_idx,train_size,replace=False)
-        train_partitions[i]=tf.data.Dataset.from_tensor_slices((train_data[p_idxs],train_label[p_idxs]))
+        train_partitions[i]=tf.data.Dataset.from_tensor_slices((train_data[indxs],train_label[indxs]))
         train_idx=list(set(train_idx)-set(indxs)) 
     for i in range(num_parties):
         indxs=np.random.choice(test_idx,test_size,replace=False)
-        test_partitions[i]=tf.data.Dataset.from_tensor_slices((test_data[p_idxs],test_label[p_idxs]))
+        test_partitions[i]=tf.data.Dataset.from_tensor_slices((test_data[indxs],test_label[indxs]))
         test_idx=list(set(test_idx)-set(indxs))                    
     return train_partitions,test_partitions
-        
+
 # 2.
 """         quantity skew         """                   
-def iid_nequal_size_split(data,label,num_parties,beta=0.9):                    
-    
-    all_num_samples=len(data)
-    partitions=[0]*num_parties
+def iid_nequal_size_split(train_data,train_label,test_data,test_label,num_parties,beta=0.9):                     
+    train_num_samples=len(train_data)
+    test_num_samples=len(test_data)
+    train_partitions=[0]*num_parties
     min_size_of_parties=0
-    while min_size_of_parties<50:                   
-        p=np.random.dirichlet(np.repeat(beta,num_parties))          # p.sum()is 1  
-        size_parties=np.random.multinomial(all_num_samples, p)       # a array of different sizes for parties
+    while min_size_of_parties<50:                  
+        p=np.random.dirichlet(np.repeat(beta,num_parties))            
+        size_parties=np.random.multinomial(train_num_samples, p)       
         min_size_of_parties=np.min(size_parties)
-    idxs=list(range(len(data)))
+    train_idx=list(range(len(train_data)))
     for i,size in enumerate(size_parties):
-        p_idxs=np.random.choice(idxs,size,replace=False)
-        partitions[i]=tf.data.Dataset.from_tensor_slices((data[p_idxs],label[p_idxs]))
-        idxs=list(set(idxs)-set(p_idxs))
-    return partitions
+        indxs=np.random.choice(train_idx,size,replace=False)
+        partitions[i]=tf.data.Dataset.from_tensor_slices((train_data[indxs],train_label[indxs]))
+        train_idx=list(set(train_idx)-set(indxs))
+    test_size=int(test_num_samples/num_parties)
+    test_idx=list(range(len(test_data)))
+    test_partitions=[0]*num_parties
+    for i in range(num_parties):
+        indxs=np.random.choice(test_idx,test_size,replace=False)
+        test_partitions[i]=tf.data.Dataset.from_tensor_slices((test_data[indxs],test_label[indxs]))
+        test_idx=list(set(test_idx)-set(indxs)) 
+    return train_partitions,test_partitions
 
 # 3.
 """         label distribution skew -->  distribution-based label imbalanced         """
