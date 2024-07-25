@@ -13,17 +13,13 @@ import gc
 
 
 def get_dataset(dataset,model):
-        
     if dataset=='mnist':
         if model=='mlp':
             X_train,Y_train,X_test,Y_test=get_mnist_mlp()
-            
         elif model in ('cnn1','cnn2','cnn3'):
-            X_train ,Y_train,X_test,Y_test=get_mnist_cnn()
-            
+            X_train ,Y_train,X_test,Y_test=get_mnist_cnn() 
     if dataset=='cifar10':
-        X_train ,Y_train,X_test,Y_test=get_cifar10()
-                
+        X_train ,Y_train,X_test,Y_test=get_cifar10()    
     return X_train,Y_train,X_test,Y_test
 
 def get_mnist_mlp():            
@@ -63,34 +59,18 @@ def get_cifar10():
     X_test=X_test.reshape(X_test.shape[0], 32, 32, 3).astype('float32')
     X_test=X_test/255.0      
     Y_test=to_categorical(Y_test,num_classes=10) 
-    return X_train,Y_train,X_test,Y_test
-
-def get_cifar10_batch(filename):                 
-    """
-    Load a single batch of CIFAR from the given file
-    """
-    with open(filename, 'rb') as f:
-        dic = pickle.load(f , encoding='latin1')
-        X = dic['data']                        # X : array 10000*3072= 0:1024 red channel 32*32,1024:2048 green channel
-                                               #   ,2048:3072: blue channel
-        Y = dic['labels']                       
-        #X = X.reshape(10000, 3, 32, 32).transpose(0,2,3,1).astype('float64')   #for cnn
-        Y = np.array(Y)
-    return X, Y       
+    return X_train,Y_train,X_test,Y_test   
 
 def plot_cifar10(idx):
     """
-    important: 
     X: array 50000*3072
     """
     X,Y,_,_=get_cifar10()          
     X=X.reshape(50000,3,32,32)           
-    
     path=r'data\cifar-10-batches-py\batches.meta'
     with open(path , 'rb') as f:
         dic=pickle.load(f,encoding="latin1")
         label_names=dic['label_names']
-        
     red=X[idx][0]
     green=X[idx][1]
     blue=X[idx][2]
@@ -108,7 +88,6 @@ def iid_equal_size_split(train_data,train_label,test_data,test_label,num_parties
     test_size=int(len(test_data)/num_parties)             
     test_partitions=[0]*num_parties
     test_idx=list(range(len(test_data)))
-    
     for i in range(num_parties):
         indxs=np.random.choice(train_idx,train_size,replace=False)
         train_partitions[i]=tf.data.Dataset.from_tensor_slices((train_data[p_idxs],train_label[p_idxs]))
@@ -118,6 +97,7 @@ def iid_equal_size_split(train_data,train_label,test_data,test_label,num_parties
         test_partitions[i]=tf.data.Dataset.from_tensor_slices((test_data[p_idxs],test_label[p_idxs]))
         test_idx=list(set(test_idx)-set(indxs))                    
     return train_partitions,test_partitions
+        
 # 2.
 """         quantity skew         """                   
 def iid_nequal_size_split(data,label,num_parties,beta=0.9):                    
