@@ -7,7 +7,6 @@ from tensorflow.keras.datasets import cifar10
 from tensorflow.keras.datasets import cifar10
 from tensorflow.keras.utils import to_categorical
 import sys
-import gc
 
 def get_dataset(dataset,model):
     if dataset=='mnist':
@@ -59,9 +58,7 @@ def get_cifar10():
     return X_train,Y_train,X_test,Y_test   
 
 def plot_cifar10(idx):
-    """
-    X: array 50000*3072
-    """
+    # X: array 50000*3072
     X,Y,_,_=get_cifar10()          
     X=X.reshape(50000,3,32,32)           
     path=r'data\cifar-10-batches-py\batches.meta'
