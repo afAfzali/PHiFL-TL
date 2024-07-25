@@ -40,12 +40,12 @@ def get_mnist_cnn():
     return X_train,Y_train,X_test,Y_test
     
 def plot_mnist(idx):
-    X,Y,_,_=get_mnist()                  # X is list,Y is array
+    X,Y,_,_=get_mnist()                 
     X=np.array(X).reshape(60000,28,28)
     image=X_train[idx]
     fig = plt.figure(figsize=(3,3))
     ax = fig.add_subplot(111)
-    ax.imshow(X[idx],cmap=plt.cm.binary)        #interpolation='bicubic'
+    ax.imshow(X[idx],cmap=plt.cm.binary)        
     ax.set_title('label ={}'.format(Y[idx]),fontsize =15) 
 
 def get_cifar10():
