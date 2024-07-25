@@ -50,7 +50,7 @@ class Client:
     def test_s(self,server):
         _,acc=server.model.evaluate(self.test)   
         return np.round(acc,2)
-# 7.        
+        
     def predict(self,model,flag):                  
         _,acc=model.evaluate(self.test)   
         acc=np.round(acc,2)
