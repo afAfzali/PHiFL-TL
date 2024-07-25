@@ -19,7 +19,7 @@ class Edgeserver:
     def aggregate(self,comm_r,num_agg):
         sample_number=[]
         weight=[]
-        for i in self.participated_sample.values():         # ترتیب کلاینت ها در دیکشنری ها با هم مطابقت دارن 
+        for i in self.participated_sample.values():         
             sample_number.append(i)
         for w in self.buffer.values():
             weight.append(w)  
