@@ -76,7 +76,6 @@ def plot_cifar10(idx):
     
 #                                   Partitioning Functions            
 # =============================================================================================================
-# 1.
 def iid_equal_size_split(train_data,train_label,test_data,test_label,num_parties):  
     train_size=int(len(train_data)/num_parties)
     train_partitions=[0]*num_parties
@@ -95,7 +94,6 @@ def iid_equal_size_split(train_data,train_label,test_data,test_label,num_parties
         test_idx=list(set(test_idx)-set(indxs))                    
     return train_partitions,test_partitions
 
-# 2.
 """         quantity skew         """                   
 def iid_nequal_size_split(train_data,train_label,test_data,test_label,num_parties,beta=0.9):                     
     train_num_samples=len(train_data)
@@ -120,7 +118,6 @@ def iid_nequal_size_split(train_data,train_label,test_data,test_label,num_partie
         test_idx=list(set(test_idx)-set(indxs)) 
     return train_partitions,test_partitions
 
-# 3.
 """         label distribution skew -->  distribution-based label imbalanced         """
 def niid_labeldis_split(data,label,num_clients,flag,beta):     # 💡  
     """
@@ -155,7 +152,7 @@ def niid_labeldis_split(data,label,num_clients,flag,beta):     # 💡
             partitions[i]=tf.data.Dataset.from_tensor_slices((data[d_idxs],label[d_idxs]))
             idxs=list(set(idxs)-set(d_idxs)) 
     return partitions
-# 4.
+
 """         label distribution skew -->  quantity-based label imbalanced      """    
 def k_niid_equal_size_split(train_data,train_label,test_data,test_label,num_parties,labels_list,k,flag=None): 
     
@@ -241,7 +238,7 @@ def k_niid_equal_size_split(train_data,train_label,test_data,test_label,num_part
             te_data[i]=test_data[test_partition_idxs[i]]
             te_label[i]=test_label[test_partition_idxs[i]]
         return tr_data,tr_label,te_data,te_label,party_labels_list
-# 5.
+
 def random_edges(num_edges,num_clients):
     #randomly select clientsfor assign clients to edgesever 
     clients_per_edge=int(num_clients/num_edges)
@@ -257,7 +254,6 @@ def random_edges(num_edges,num_clients):
         print(f'be assigned to edgeserver_{edgeid+1}')
     return assigned_clients
 
-# 6. 
 def k_niid_equal_size_split_1(train_data,train_label,test_data,test_label,num_parties,labels_list,k,flag=None): 
     
     """ k: number of lables for each party """
@@ -342,14 +338,12 @@ def k_niid_equal_size_split_1(train_data,train_label,test_data,test_label,num_pa
             te_label[i]=test_label[test_partition_idxs[i]]
         return tr_data,tr_label,te_data,te_label,party_labels_list 
 
-# 7.
 def get_classes(data_label):
     l=[0]*10
     for _,i in data_label:
         l[np.argmax(i)] += 1
     return list(np.where(np.array(l)!=0)[0])     
 
-# 8.
 """         feature distribution skew --->> noise_based feature imbalanced         """
 def Gaussian_noise(data,original_std,idx,num_parties,mean=0):   
     """
