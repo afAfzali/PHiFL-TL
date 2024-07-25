@@ -101,25 +101,23 @@ def plot_cifar10(idx):
     ax.set_title('Category ={}'.format(label_names[Y[idx]]),fontsize =15)
 
 # 1.
-def iid_equal_size_split(data,label,num_parties,flag=None):                             
-    num_samples_party=int(len(data)/num_parties)             
-    idxs=list(range(len(data)))
-    if flag==None:
-        partitions=[0]*num_parties
-        for i in range(num_parties):
-            p_idxs=np.random.choice(idxs,num_samples_party,replace=False)
-            partitions[i]=tf.data.Dataset.from_tensor_slices((data[p_idxs],label[p_idxs]))
-            idxs=list(set(idxs)-set(p_idxs))                    
-        return partitions
-    else:
-        partitions_1=[0]*num_parties
-        partitions_2=[0]*num_parties
-        for i in range(num_parties):
-            p_idxs=np.random.choice(idxs,num_samples_party,replace=False)
-            partitions_1[i]=data[p_idxs]
-            partitions_2[i]=label[p_idxs]
-            idxs=list(set(idxs)-set(p_idxs))                    
-        return partitions_1,partitions_2
+def iid_equal_size_split(train_data,train_label,test_data,test_label,num_parties):  
+    train_size=int(len(train_data)/num_parties)
+    train_partitions=[0]*num_parties
+    train_idx=list(range(len(train_data)))
+    test_size=int(len(test_data)/num_parties)             
+    test_partitions=[0]*num_parties
+    test_idx=list(range(len(test_data)))
+    
+    for i in range(num_parties):
+        indxs=np.random.choice(train_idx,train_size,replace=False)
+        train_partitions[i]=tf.data.Dataset.from_tensor_slices((train_data[p_idxs],train_label[p_idxs]))
+        train_idx=list(set(train_idx)-set(indxs)) 
+    for i in range(num_parties):
+        indxs=np.random.choice(test_idx,test_size,replace=False)
+        test_partitions[i]=tf.data.Dataset.from_tensor_slices((test_data[p_idxs],test_label[p_idxs]))
+        test_idx=list(set(test_idx)-set(indxs))                    
+    return train_partitions,test_partitions
 # 2.
 """         quantity skew         """                   
 def iid_nequal_size_split(data,label,num_parties,beta=0.9):                    
