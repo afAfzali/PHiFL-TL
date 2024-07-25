@@ -6,7 +6,6 @@ import tensorflow as tf
 
 class Client:    
 
-# 1.
     def __init__(self,id_client,train_partition,test_partition,dataset,model,loss,metrics,lr,
                                                        batch_size,image_shape,val_ratio):
 
@@ -26,7 +25,6 @@ class Client:
         self.test_num=test_partition.cardinality().numpy()
         self.val_num=val_partition.cardinality().numpy()
         
- # 2.
     def local_model_train(self,epochs,verbose,folder,comm_r=None,num_agg=None):  
         filepath=fr'.\clients_models_checkpoints\ckpoint_{self.name}'
         es=EarlyStopping(monitor='val_loss', mode='min', patience=3)   
@@ -39,18 +37,16 @@ class Client:
             self.comm_agg.append((comm_r+1,num_agg+1))
             self.model.save(fr'.\results\edges_models\comm_{comm_r+1}_agg_{num_agg+1}_{self.name}.h5')
         
-# 3.
     def send_to_edgeserver (self,edgeserver): 
         edgeserver.buffer[self.name]=self.model.get_weights()
         
-# 4.
     def test(self):       
         predict_y=self.model.evaluate(self.test)  
         return np.round(acc,2)
-# 5.   
+   
     def m_compile(self,loss,optimizer,metrics):
         self.model.compile(loss=loss,optimizer=optimizer,metrics=metrics)
-# 6.    
+    
     def test_s(self,server):
         _,acc=server.model.evaluate(self.test)   
         return np.round(acc,2)
