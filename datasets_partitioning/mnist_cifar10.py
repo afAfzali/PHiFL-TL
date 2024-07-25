@@ -1,5 +1,3 @@
-# Download the required dataset,split into data , labels
-
 import numpy as np
 import random
 import tensorflow as tf
@@ -10,7 +8,6 @@ from tensorflow.keras.datasets import cifar10
 from tensorflow.keras.utils import to_categorical
 import sys
 import gc
-
 
 def get_dataset(dataset,model):
     if dataset=='mnist':
