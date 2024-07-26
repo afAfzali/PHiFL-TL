@@ -211,7 +211,6 @@ elif flag1==5:
     del X_train,Y_train,X_test,Y_test,train_partitions,test_partitions
     gc.collect()
     print(tracemalloc.get_traced_memory()) 
-    
 # =============================================================================================================
 path=fr'.\results\edges_models\\'                     
 for file_name in os.listdir(path):
@@ -232,9 +231,7 @@ for file_name in os.listdir(path):
     file=path+file_name
     if os.path.isfile(file):
         os.remove(file)                   
-# =============================================================================
-#                            GLOBAL TRAINING PHASE        
-# =============================================================================
+        
 # assigning edges to server 
 for edge in edges:                                   
     server.edgeserver_registering(edge)
@@ -280,5 +277,53 @@ for comm_r in range(communication_round):
 print(process.memory_info().rss-start_rss)
 print(tracemalloc.get_traced_memory())
 tracemalloc.stop()
-  
-
+# send final global model to clients ...
+for edge in edges:                                       
+    server.send_to_edgeserver(edge)  
+for edge in edges:
+    for client_name in edge.cnames:
+        index=int(client_name.split('_')[1])-1
+        edge.send_to_client(clients[index])   
+# TL
+if flag1==3:
+    for client in clients: 
+        for layer in client.model.layers[:-2]:                     
+            layer.trainable=False
+        optimizer=tf.keras.optimizers.SGD(learning_rate=0.00001)
+        client.m_compile(loss=loss,optimizer=optimizer,metrics=metrics)
+        client.local_model_train(epochs=epochs,batch_size=batch_size,verbose=0)  #fit // epoch , bs متفاوت یا قبلی؟  
+        acc=client.test()
+        client.acc.append(acc)
+# acc report (without personalized,with personalized)               
+for client in clients:
+    print(client.name,":",client.acc,"------",client.comm_agg)
+# plots
+c_model=create(dataset,model,loss,metrics,lr,image_shape)
+for edge in edges:
+    for client_name in edge.cnames:
+        index=int(client_name.split('_')[1])-1
+        file=fr'.\results\global_models\{folder}\itr_0.h5'
+        c_model.load_weights(file)
+        clients[index].predict(c_model,0)            # 0 -->  level 0 : sever model
+        for comm_r in range(communication_round):
+            
+            for num_agg in range(num_edge_aggregation):
+                file=fr'.\results\edges_models\{folder}\comm_{comm_r+1}_agg_{num_agg+1}_{client_name}.h5'
+                if os.path.isfile(file):
+                    c_model.load_weights(file)
+                    clients[index].predict(c_model,2)      #2 --> level 2 : client model
+                else:       
+                    clients[index].all_acc.append(clients[index].all_acc[-1])
+                    
+                file=fr'.\results\edges_models\{folder}\itr_{comm_r+1}\agg_{num_agg+1}_{edge.name}.h5'
+                c_model.load_weights(file)
+                clients[index].predict(c_model,1)            # 1 --> level 1 : edge model 
+                
+            file=fr'.\results\global_models\{folder}\itr_{comm_r+1}.h5'
+            c_model.load_weights(file)
+            clients[index].predict(c_model,0)
+for client in clients:
+    client_plot(client,folder) 
+# report
+for client in clients:
+    print(client.name ,"--", "local :",client.all_acc[1] , "/" , "fed :" ,client.all_acc[-1])
