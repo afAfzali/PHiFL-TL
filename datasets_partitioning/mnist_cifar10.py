@@ -170,7 +170,7 @@ def k_niid_equal_size_split(train_data,train_label,test_data,test_label,num_part
                 z=1
         else:
             if len(zero_list)<k:
-                for idx in zero_list:          # تابع رو برای حالات ممکن که همه لیبل ها در پارتیشن ها باشند نوشتم 
+                for idx in zero_list:          
                     c.append(labels_list[idx])
                     times[idx]+=1
                 rest_labels_list=list(set(labels_index)-set(zero_list))
