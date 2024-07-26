@@ -254,7 +254,7 @@ def Gaussian_noise(train_data,test_data,original_std,idx,num_parties,mean=0):
     for party idx :std = original_std*(idx/num_parties)
     image data and noisy_image_data must be scaled in [0, 1] 
     """
-    std=original_std*idx/num_parties #  یه بار الگوی نویز ایجاد کنم و به همه تصاویر همون نویز مشابه رو بدم یا همین که نوشتم اوکیه ؟
+    std=original_std*idx/num_parties 
     noisy_train_list=[]
     noisy_test_list=[]
     noise=np.random.randn(*train_data[0].shape)*std+mean
