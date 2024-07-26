@@ -248,7 +248,26 @@ def k_niid_equal_size_split(train_data,train_label,test_data,test_label,num_part
             te_data[i]=test_data[test_partition_idxs[i]]
             te_label[i]=test_label[test_partition_idxs[i]]
         return tr_data,tr_label,te_data,te_label,party_labels_list
-
+        
+def Gaussian_noise(train_data,test_data,original_std,idx,num_parties,mean=0):
+    """
+    for party idx :std = original_std*(idx/num_parties)
+    image data and noisy_image_data must be scaled in [0, 1] 
+    """
+    std=original_std*idx/num_parties #  یه بار الگوی نویز ایجاد کنم و به همه تصاویر همون نویز مشابه رو بدم یا همین که نوشتم اوکیه ؟
+    noisy_train_list=[]
+    noisy_test_list=[]
+    noise=np.random.randn(*train_data[0].shape)*std+mean
+    for i in range(len(train_data)):
+        #noise=np.random.randn(*train_data[i].shape)*std+mean
+        train_noisy_data=np.clip(noise+train_data[i],0,1)
+        noisy_train_list.append(train_noisy_data)
+    for i in range(len(test_data)):
+        #noise=np.random.randn(*train_data[i].shape)*std+mean
+        test_noisy_data=np.clip(noise+test_data[i],0,1)
+        noisy_test_list.append(test_noisy_data)
+    return noisy_train_list,noisy_test_list
+    
 def random_edges(num_edges,num_clients):
     #randomly select clientsfor assign clients to edgesever 
     clients_per_edge=int(num_clients/num_edges)
