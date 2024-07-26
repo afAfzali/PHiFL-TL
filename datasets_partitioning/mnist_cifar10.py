@@ -76,22 +76,38 @@ def plot_cifar10(idx):
     
 #                                   Partitioning Functions            
 # =============================================================================================================
-def iid_equal_size_split(train_data,train_label,test_data,test_label,num_parties):  
-    train_size=int(len(train_data)/num_parties)
-    train_partitions=[0]*num_parties
+train_size=int(len(train_data)/num_parties)
     train_idx=list(range(len(train_data)))
     test_size=int(len(test_data)/num_parties)             
-    test_partitions=[0]*num_parties
     test_idx=list(range(len(test_data)))
-    for i in range(num_parties):
-        indxs=np.random.choice(train_idx,train_size,replace=False)
-        train_partitions[i]=tf.data.Dataset.from_tensor_slices((train_data[indxs],train_label[indxs]))
-        train_idx=list(set(train_idx)-set(indxs)) 
-    for i in range(num_parties):
-        indxs=np.random.choice(test_idx,test_size,replace=False)
-        test_partitions[i]=tf.data.Dataset.from_tensor_slices((test_data[indxs],test_label[indxs]))
-        test_idx=list(set(test_idx)-set(indxs))                    
-    return train_partitions,test_partitions
+    if flag==None:
+        train_partitions=[0]*num_parties
+        test_partitions=[0]*num_parties
+        for i in range(num_parties):
+            indxs=np.random.choice(train_idx,train_size,replace=False)
+            train_partitions[i]=tf.data.Dataset.from_tensor_slices((train_data[indxs],train_label[indxs]))
+            train_idx=list(set(train_idx)-set(indxs)) 
+        for i in range(num_parties):
+            indxs=np.random.choice(test_idx,test_size,replace=False)
+            test_partitions[i]=tf.data.Dataset.from_tensor_slices((test_data[indxs],test_label[indxs]))
+            test_idx=list(set(test_idx)-set(indxs))                    
+        return train_partitions,test_partitions
+    else:
+        train_data_partitions=[0]*num_parties
+        train_label_partitions=[0]*num_parties
+        test_data_partitions=[0]*num_parties
+        test_label_partitions=[0]*num_parties
+        for i in range(num_parties):
+            indxs=np.random.choice(train_idx,train_size,replace=False)
+            train_data_partitions[i]=train_data[indxs]
+            train_label_partitions[i]=train_label[indxs]
+            train_idx=list(set(train_idx)-set(indxs))  
+        for i in range(num_parties):
+            indxs=np.random.choice(test_idx,test_size,replace=False)
+            test_data_partitions[i]=test_data[indxs]
+            test_label_partitions[i]=test_label[indxs]
+            test_idx=list(set(test_idx)-set(indxs))
+        return train_data_partitions,train_label_partitions,test_data_partitions,test_label_partitions
 
 """         quantity skew         """                   
 def iid_nequal_size_split(train_data,train_label,test_data,test_label,num_parties,beta=0.9):                     
