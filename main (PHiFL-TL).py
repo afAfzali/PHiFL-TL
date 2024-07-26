@@ -291,7 +291,7 @@ if flag1==3:
             layer.trainable=False
         optimizer=tf.keras.optimizers.SGD(learning_rate=0.00001)
         client.m_compile(loss=loss,optimizer=optimizer,metrics=metrics)
-        client.local_model_train(epochs=epochs,batch_size=batch_size,verbose=0)  #fit // epoch , bs متفاوت یا قبلی؟  
+        client.local_model_train(epochs=epochs,batch_size=batch_size,verbose=0)   
         acc=client.test()
         client.acc.append(acc)
 # acc report (without personalized,with personalized)               
