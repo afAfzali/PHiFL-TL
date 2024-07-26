@@ -76,7 +76,8 @@ def plot_cifar10(idx):
     
 #                                   Partitioning Functions            
 # =============================================================================================================
-train_size=int(len(train_data)/num_parties)
+def iid_equal_size_split(train_data,train_label,test_data,test_label,num_parties,flag=None):  
+    train_size=int(len(train_data)/num_parties)
     train_idx=list(range(len(train_data)))
     test_size=int(len(test_data)/num_parties)             
     test_idx=list(range(len(test_data)))
