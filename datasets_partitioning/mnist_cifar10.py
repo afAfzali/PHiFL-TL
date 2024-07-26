@@ -152,8 +152,7 @@ def niid_labeldis_split(train_data,train_label,test_data,test_label,num_clients,
 
 """         label distribution skew -->  quantity-based label imbalanced      """    
 def k_niid_equal_size_split(train_data,train_label,test_data,test_label,num_parties,labels_list,k,flag=None): 
-    
-    """ k: number of lables for each party """    
+    # k: number of lables for each party
     labels_index=np.arange(len(labels_list))
     times=[0]*len(labels_list) 
     party_labels_list=[] 
@@ -171,7 +170,7 @@ def k_niid_equal_size_split(train_data,train_label,test_data,test_label,num_part
                 z=1
         else:
             if len(zero_list)<k:
-                for idx in zero_list:           
+                for idx in zero_list:          # تابع رو برای حالات ممکن که همه لیبل ها در پارتیشن ها باشند نوشتم 
                     c.append(labels_list[idx])
                     times[idx]+=1
                 rest_labels_list=list(set(labels_index)-set(zero_list))
@@ -187,11 +186,9 @@ def k_niid_equal_size_split(train_data,train_label,test_data,test_label,num_part
                     times[idx]+=1
                 zero_list=list(np.where(np.array(times)==0)[0]) 
                 z=1
- 
         party_labels_list.append(c)
     train_i=[np.argmax(train_label[idx]) for idx in range(len(train_label))]
     test_i=[np.argmax(test_label[idx]) for idx in range(len(test_label))]
-
     train_partition_idxs=[[] for _ in range(num_parties)]
     test_partition_idxs=[[] for _ in range(num_parties)]
     train_idx_l=[]
@@ -251,106 +248,8 @@ def random_edges(num_edges,num_clients):
         print(f'be assigned to edgeserver_{edgeid+1}')
     return assigned_clients
 
-def k_niid_equal_size_split_1(train_data,train_label,test_data,test_label,num_parties,labels_list,k,flag=None): 
-    
-    """ k: number of lables for each party """
-
-    num_labels=len(labels_list)
-    times=[0]*num_labels    
-    party_labels_list=[] 
-    for i in range(num_parties):
-        c=[labels_list[i%num_labels]]
-        times[i%num_labels]+=1
-        j=1
-        if num_parties<num_labels:
-            diff=num_labels-num_parties 
-            d=0
-            multiple=1
-            while d<diff and j<k:
-                ii=i                               
-                idx=(ii%num_labels)+(multiple*num_parties)
-                if idx>len(labels_list)-1:
-                    break
-                c.append(labels_list[idx])
-                times[idx]+=1
-                d+=1
-                j+=1
-                multiple+=1
-                if (ii%num_labels)+(multiple*num_parties)>len(labels_list)-1:
-                    break            
-        while (j<k):
-            idx=random.randint(0,num_labels-1)              
-            if (labels_list[idx] not in c):
-                c.append(labels_list[idx])
-                times[idx]+=1
-                j+=1
-        party_labels_list.append(c)
-    train_i=[np.argmax(train_label[idx]) for idx in range(len(train_label))]
-    test_i=[np.argmax(test_label[idx]) for idx in range(len(test_label))]
-
-    train_partition_idxs=[0]*num_parties
-    test_partition_idxs=[0]*num_parties
-    train_idx_l=[]
-    test_idx_l=[]
-    for i,l in enumerate(labels_list):
-        for j,d in enumerate(train_i):
-            if d==l:
-                train_idx_l.append(j)
-        for j,d in enumerate(test_i):
-            if d==l:
-                test_idx_l.append(j)
-        #train_idx_l=np.where(train_i==l)[0]  
-        #test_idx_l=np.where(test_i==l)[0]          
-        np.random.shuffle(train_idx_l)
-        np.random.shuffle(test_idx_l)
-        train_split=np.array_split(train_idx_l,times[i])
-        test_split=np.array_split(test_idx_l,times[i])
-        index=0
-        for j in range(num_parties):
-            if l in party_labels_list[j]:
-                train_partition_idxs[j]=train_split[index]
-                test_partition_idxs[j]=test_split[index]               
-                index+=1
-        train_idx_l.clear()
-        test_idx_l.clear()
-        
-    if flag==None:
-        train_partitions=[0]*num_parties
-        test_partitions=[0]*num_parties
-        for i in range(num_parties):                                                                                                                                    
-            train_partitions[i]=tf.data.Dataset.from_tensor_slices((train_data[train_partition_idxs[i]],
-                                                                    train_label[train_partition_idxs[i]]))
-            test_partitions[i]=tf.data.Dataset.from_tensor_slices((test_data[test_partition_idxs[i]],
-                                                                    test_label[test_partition_idxs[i]]))
-        return train_partitions,test_partitions
-    else:
-        tr_data=[0]*num_parties
-        tr_label=[0]*num_parties
-        te_data=[0]*num_parties
-        te_label=[0]*num_parties
-        for i in range(num_parties):
-            tr_data[i]=train_data[train_partition_idxs[i]]
-            tr_label[i]=train_label[train_partition_idxs[i]]
-            te_data[i]=test_data[test_partition_idxs[i]]
-            te_label[i]=test_label[test_partition_idxs[i]]
-        return tr_data,tr_label,te_data,te_label,party_labels_list 
-
 def get_classes(data_label):
     l=[0]*10
     for _,i in data_label:
         l[np.argmax(i)] += 1
     return list(np.where(np.array(l)!=0)[0])     
-
-"""         feature distribution skew --->> noise_based feature imbalanced         """
-def Gaussian_noise(data,original_std,idx,num_parties,mean=0):   
-    """
-    for party idx :std = original_std*(idx/num_parties)
-    image data and noisy_image_data must be scaled in [0, 1] 
-    """
-    std=original_std*idx/num_parties
-    noisy_data=[]
-    noise=np.random.randn(*data.shape)*std+mean
-    for i in range(len(data)):
-        noisy=np.clip(noise+data[i],0,1)
-        noisy_data.append(noisy)
-    return np.array(noisy_data)
