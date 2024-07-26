@@ -211,7 +211,7 @@ elif flag1==5:
     del X_train,Y_train,X_test,Y_test,train_partitions,test_partitions
     gc.collect()
     print(tracemalloc.get_traced_memory()) 
-  
+    
 # =============================================================================================================
 path=fr'.\results\edges_models\\'                     
 for file_name in os.listdir(path):
@@ -232,7 +232,53 @@ for file_name in os.listdir(path):
     file=path+file_name
     if os.path.isfile(file):
         os.remove(file)                   
-# =============================================================================================================
+# =============================================================================
+#                            GLOBAL TRAINING PHASE        
+# =============================================================================
 # assigning edges to server 
 for edge in edges:                                   
     server.edgeserver_registering(edge)
+server.model.save(fr".\results\global_models\{folder}\itr_0.h5")
+for comm_r in range(communication_round):    
+    print(f'===================================={comm_r+1} c_round...start================================================')
+    for edge in edges:
+        server.send_to_edgeserver(edge)       
+    #buffer is cleared              
+    server.refresh_server() 
+    # my assumption: all edges participate in training phase in each communication round             
+    for num_agg in range(num_edge_aggregation):
+        print(f'--------------------------------------{num_agg+1} agg...start---------------------------------------') 
+        for edge in edges:
+            print(f'************{edge.name}******************start')
+            # buffer & participated_sample are cleared
+            edge.refresh_edgeserver()        
+            #fraction of clients of each edge participate ...
+            selected_clients_num=max(int(clients_per_edge*fraction_clients),1)
+            selected_clients_name=np.random.choice(edge.cnames,selected_clients_num,replace=False)
+            for client_name in selected_clients_name:                 
+                index=int(client_name.split('_')[1])-1               
+                edge.client_registering(clients[index])               
+            for client_name in selected_clients_name: 
+                index=int(client_name.split('_')[1])-1
+                edge.send_to_client(clients[index])    
+                print(f"\n--------------------------------> {client_name} be selected:")
+                clients[index].m_compile(loss=loss,optimizer=optimizer,metrics=metrics)     #❓❓❓💡💡❓❓❓
+                clients[index].local_model_train(epochs,batch_size,verbose,comm_r,num_agg)
+                clients[index].send_to_edgeserver(edge)               # buffer                
+            edge.aggregate(comm_r,num_agg)
+            print(f'************{edge.name}******************end')
+    #************end for/// iteration in edges
+        print(f'--------------------------------------{num_agg+1} agg...end---------------------------------------')
+    #*********** end for///edge aggregation        
+    # begin server aggregation
+    for edge in edges:                            
+        edge.send_to_server(server)     # server' buffer
+    for client in clients:
+        acc=client.test_s(server)
+        client.acc.append(acc)
+    print(f'===================================={comm_r+1} c_round...end================================================')
+print(process.memory_info().rss-start_rss)
+print(tracemalloc.get_traced_memory())
+tracemalloc.stop()
+  
+
