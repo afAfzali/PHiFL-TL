@@ -213,3 +213,26 @@ elif flag1==5:
     print(tracemalloc.get_traced_memory()) 
   
 # =============================================================================================================
+path=fr'.\results\edges_models\{folder}\\'                     
+for file_name in os.listdir(path):
+    file=path+file_name
+    if os.path.isfile(file):
+        os.remove(file)
+path=fr'.\results\edges_models\{folder}\\'                       
+for file_name in os.listdir(path):
+    file=path+file_name
+    shutil.rmtree(file)
+path=fr'.\results\global_models\{folder}\\'                    
+for file_name in os.listdir(path):
+    file=path+file_name
+    if os.path.isfile(file):
+        os.remove(file)
+path=fr'.\results\fig\{folder}\\'                        
+for file_name in os.listdir(path):
+    file=path+file_name
+    if os.path.isfile(file):
+        os.remove(file)                   
+# =============================================================================================================
+# assigning edges to server 
+for edge in edges:                                   
+    server.edgeserver_registering(edge)
