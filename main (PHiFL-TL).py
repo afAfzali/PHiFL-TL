@@ -213,21 +213,21 @@ elif flag1==5:
     print(tracemalloc.get_traced_memory()) 
   
 # =============================================================================================================
-path=fr'.\results\edges_models\{folder}\\'                     
+path=fr'.\results\edges_models\\'                     
 for file_name in os.listdir(path):
     file=path+file_name
     if os.path.isfile(file):
         os.remove(file)
-path=fr'.\results\edges_models\{folder}\\'                       
+path=fr'.\results\edges_models\\'                       
 for file_name in os.listdir(path):
     file=path+file_name
     shutil.rmtree(file)
-path=fr'.\results\global_models\{folder}\\'                    
+path=fr'.\results\global_models}\\'                    
 for file_name in os.listdir(path):
     file=path+file_name
     if os.path.isfile(file):
         os.remove(file)
-path=fr'.\results\fig\{folder}\\'                        
+path=fr'.\results\fig\\'                        
 for file_name in os.listdir(path):
     file=path+file_name
     if os.path.isfile(file):
