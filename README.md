@@ -35,4 +35,4 @@ Implementation of the algorithm presented in the paper titled "PHiFL-TL: Persona
         image_shape=(28,28,1)
   
 **Notice:**
-  You need to create the following folders where the program is located: `results\global_models` and `results\edges_models\itr_i` (i : 1 to communication_round)
+  You need to create the following folders where the program is located: `results\global_models`, `results\edges_models\itr_i` (i : 1 to communication_round) and `results\fig`.
