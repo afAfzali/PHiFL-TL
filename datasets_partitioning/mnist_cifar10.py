@@ -83,7 +83,6 @@ def iid_equal_size_split(train_data,train_label,test_data,test_label,num_parties
     test_size=int(len(test_data)/num_parties)             
     test_partitions=[0]*num_parties
     test_idx=list(range(len(test_data)))
-    
     for i in range(num_parties):
         indxs=np.random.choice(train_idx,train_size,replace=False)
         train_partitions[i]=tf.data.Dataset.from_tensor_slices((train_data[indxs],train_label[indxs]))
@@ -122,7 +121,6 @@ def iid_nequal_size_split(train_data,train_label,test_data,test_label,num_partie
 def niid_labeldis_split(train_data,train_label,test_data,test_label,num_clients,beta):       
     # each client has a proportion of the samples of each label(Dirichlet distribution)
     # The size of the local data set is not equal
-    
     num_labels=10 
     train_num_samples=len(train_data)
     train_i=np.array([np.argmax(train_data[idx][1]) for idx in range(len(train_data))])
