@@ -122,7 +122,7 @@ def iid_nequal_size_split(train_data,train_label,test_data,test_label,num_partie
     train_idx=list(range(len(train_data)))
     for i,size in enumerate(size_parties):
         indxs=np.random.choice(train_idx,size,replace=False)
-        partitions[i]=tf.data.Dataset.from_tensor_slices((train_data[indxs],train_label[indxs]))
+        train_partitions[i]=tf.data.Dataset.from_tensor_slices((train_data[indxs],train_label[indxs]))
         train_idx=list(set(train_idx)-set(indxs))
     test_size=int(test_num_samples/num_parties)
     test_idx=list(range(len(test_data)))
