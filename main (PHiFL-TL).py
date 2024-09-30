@@ -25,7 +25,7 @@ from datasets_partitioning.mnist_femnist import random_edges
 from datasets_partitioning.mnist_femnist import iid_equal_size_split
 from datasets_partitioning.mnist_femnist import iid_nequal_size_split
 from datasets_partitioning.mnist_femnist import niid_labeldis_split
-from datasets_partitioning.mnist_femnist import 
+from datasets_partitioning.mnist_femnist import get_clients_femnist_cnn_with_reduce_writers_k_classes
 from tensorflow.keras.models import load_model
 from model.initialize_model import create
 from tensorflow.keras.utils import plot_model,to_categorical
