@@ -85,7 +85,7 @@ if dataset!="femnist":
           '3 : each client owns data samples of a fixed number of labels\n'
           '4 : each client(and edge) owns data samples of a different feature distribution\n'
           '5 : each client owns a proportion of the samples of each label\n')
-    
+    flag1=int(input('select a number:')) 
     #     ***********clients_iid*****************
     if flag1 in (1,2):                                      
         print('\n** randomly are assigned clients to edgesevers **')
