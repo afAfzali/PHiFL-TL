@@ -17,14 +17,15 @@ import tensorflow as tf
 from client import Client
 from edgeserver import Edgeserver
 from server import Server 
-from datasets_partitioning.mnist_cifar10 import get_dataset
-from datasets_partitioning.mnist_cifar10 import k_niid_equal_size_split
-from datasets_partitioning.mnist_cifar10 import Gaussian_noise
-from datasets_partitioning.mnist_cifar10 import get_classes
-from datasets_partitioning.mnist_cifar10 import random_edges
-from datasets_partitioning.mnist_cifar10 import iid_equal_size_split
-from datasets_partitioning.mnist_cifar10 import iid_nequal_size_split
-from datasets_partitioning.mnist_cifar10 import niid_labeldis_split
+from datasets_partitioning.mnist_femnist import get_dataset
+from datasets_partitioning.mnist_femnist import k_niid_equal_size_split
+from datasets_partitioning.mnist_femnist import Gaussian_noise
+from datasets_partitioning.mnist_femnist import get_classes
+from datasets_partitioning.mnist_femnist import random_edges
+from datasets_partitioning.mnist_femnist import iid_equal_size_split
+from datasets_partitioning.mnist_femnist import iid_nequal_size_split
+from datasets_partitioning.mnist_femnist import niid_labeldis_split
+from datasets_partitioning.mnist_femnist import 
 from tensorflow.keras.models import load_model
 from model.initialize_model import create
 from tensorflow.keras.utils import plot_model,to_categorical
@@ -183,7 +184,7 @@ if dataset!="femnist":
             print(f'be assigned to {edges[edgeid].name}')
         server=Server(dataset,model,loss,metrics,lr,image_shape)   
         print(tracemalloc.get_traced_memory()) 
-        del X_train,Y_train,X_test,Y_test,train_partitions,test_partitions,train_noisy_edge,test_noisy_edge,train_party_partitions,test_party_partitions
+        del X_train,Y_train,X_test,Y_test,train_noisy_edge,test_noisy_edge,train_party_partitions,test_party_partitions
         gc.collect()
         print(tracemalloc.get_traced_memory())
         
@@ -216,6 +217,33 @@ if dataset!="femnist":
         del X_train,Y_train,X_test,Y_test,train_partitions,test_partitions
         gc.collect()
         print(tracemalloc.get_traced_memory()) 
+    
+elif dataset=="femnist":     
+    print('equal size + reducing writers')
+    print('\n** randomly are assigned clients to edgesevers **')
+    train_partitions,test_partitions=get_clients_femnist_cnn_with_reduce_writers_k_classes(num_clients,train_size,
+                                                                                           test_size,num_labels)
+    print("partitinong ...end !")
+    clients=[]
+    edges=[]
+    for i in range(num_clients):
+        client_classes=get_classes(train_partitions[i],num_labels)
+        clients.append(Client(i,train_partitions[i],test_partitions[i],client_classes,dataset,model,loss,metrics,
+                                                     lr,image_shape,latent_dim,num_labels,batch_size))     
+    assigned_clients_list=random_edges(num_edges,num_clients) 
+    for edgeid in range(num_edges):
+        edges.append(Edgeserver(edgeid,assigned_clients_list[edgeid],dataset,image_shape,latent_dim,num_labels))
+        for client_name in assigned_clients_list[edgeid]:               
+            index=int(client_name.split('_')[1])-1                # k-1
+            edges[edgeid].classes_registering(clients[index])
+    clients_per_edge=int(num_clients/num_edges)
+    server=Server()   
+
+    print(tracemalloc.get_traced_memory()) 
+    del train_partitions,test_partitions,assigned_clients_list
+    gc.collect()
+    print(tracemalloc.get_traced_memory())
+        
 # =============================================================================================================
 path=fr'.\results\edges_models\\'                     
 for file_name in os.listdir(path):
