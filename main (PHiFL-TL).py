@@ -165,8 +165,8 @@ if dataset!="femnist":
         index=0 
         for edgeid in range(num_edges):
             train_noisy_edge,test_noisy_edge=Gaussian_noise(X_train[edgeid],X_test[edgeid],original_std,edgeid,num_edges,mean)
-            train_party_partitions,test_party_partitions=k_niid_equal_size_split(train_noisy_edge,Y_train,test_noisy_edge, 
-                                                                                 Y_test,clients_per_edge,labels_list,k)
+            train_party_partitions,test_party_partitions=k_niid_equal_size_split(train_noisy_edge,Y_train[edgeid],test_noisy_edge, 
+                                                                                 Y_test[edgeid],clients_per_edge,labels_list,k)
             assigned_clients=[]
             for i in range(clients_per_edge):
                 clients.append(Client(index,train_party_partitions[i],test_party_partitions[i],dataset,model,loss,metrics,
