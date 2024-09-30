@@ -19,9 +19,9 @@ class Client:
         self.test=test_partition.batch(32)
         
         self.model=create(dataset,model,loss,metrics,lr,image_shape)     # includes build and compile
-        self.train_num=train_partition.cardinality().numpy()
-        self.test_num=test_partition.cardinality().numpy()
-        self.val_num=val_partition.cardinality().numpy()
+        self.train_num=self.train.cardinality().numpy()
+        self.test_num=self.test.cardinality().numpy()
+        self.val_num=self.val.cardinality().numpy()
         
     def local_model_train(self,epochs,verbose,folder,comm_r=None,num_agg=None):  
         filepath=fr'.\clients_models_checkpoints\ckpoint_{self.name}'
