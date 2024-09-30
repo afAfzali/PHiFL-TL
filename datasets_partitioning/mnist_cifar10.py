@@ -266,7 +266,7 @@ def Gaussian_noise(train_data,test_data,original_std,idx,num_parties,mean=0):
         #noise=np.random.randn(*train_data[i].shape)*std+mean
         test_noisy_data=np.clip(noise+test_data[i],0,1)
         noisy_test_list.append(test_noisy_data)
-    return noisy_train_list,noisy_test_list
+    return np.array(noisy_train_list),np.array(noisy_test_list)
     
 def random_edges(num_edges,num_clients):
     #randomly select clientsfor assign clients to edgesever 
