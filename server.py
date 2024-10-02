@@ -11,7 +11,7 @@ class Server:
         self.model=create(dataset,model,loss,metrics,lr,image_shape)  
         self.test_avg_acc=[]                                 
     
-    def aggregate(self):
+    def aggregate(self,comm_r):
         sample_number=[]
         weights=[]
         for i in self.participated_sample.values():
