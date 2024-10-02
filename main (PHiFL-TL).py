@@ -48,7 +48,7 @@ dataset="mnist"
 if dataset=='cifar10' or dataset=="mnist":
     num_labels=10
 if dataset=='femnist':
-    number_labels=10   # number classes of 62 classes   # 🔹
+    num_labels=10   # number classes of 62 classes   # 🔹
     train_size=21000
     test_size=9000 
 model="cnn1"   #or cnn2, cnn3
