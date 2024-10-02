@@ -1,6 +1,7 @@
 import numpy as np
 from model.initialize_model import create    
 import tensorflow as tf 
+from tensorflow.keras.callbacks import EarlyStopping
 
 class Client:    
 
@@ -23,7 +24,7 @@ class Client:
         self.test_num=self.test.cardinality().numpy()
         self.val_num=self.val.cardinality().numpy()
         
-    def local_model_train(self,epochs,verbose,folder,comm_r=None,num_agg=None):  
+    def local_model_train(self,epochs,verbose,comm_r=None,num_agg=None):  
         filepath=fr'.\clients_models_checkpoints\ckpoint_{self.name}'
         es=EarlyStopping(monitor='val_loss', mode='min', patience=3)   
         mc=ModelCheckpoint(filepath=filepath,save_weights_only=True,
