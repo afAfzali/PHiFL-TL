@@ -1,7 +1,7 @@
 import numpy as np
 from model.initialize_model import create    
 import tensorflow as tf 
-from tensorflow.keras.callbacks import EarlyStopping
+from tensorflow.keras.callbacks import ModelCheckpoint,EarlyStopping
 
 class Client:    
 
