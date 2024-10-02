@@ -324,8 +324,7 @@ if flag1==3:
         optimizer=tf.keras.optimizers.SGD(learning_rate=0.00001)
         client.m_compile(loss=loss,optimizer=optimizer,metrics=metrics)
         client.local_model_train(epochs=epochs,batch_size=batch_size,verbose=0)   
-        acc=client.test()
-        client.acc.append(acc)
+        client.test()
 # acc report (without personalized,with personalized)               
 for client in clients:
     print(client.name,":",client.acc,"------",client.comm_agg)
