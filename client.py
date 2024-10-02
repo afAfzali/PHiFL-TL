@@ -40,7 +40,7 @@ class Client:
         edgeserver.buffer[self.name]=self.model.get_weights()
         
     def test(self):       
-        predict_y=self.model.evaluate(self.test)  
+        _,acc=self.model.evaluate(self.test)  
         return np.round(acc,2)
    
     def m_compile(self,loss,optimizer,metrics):
