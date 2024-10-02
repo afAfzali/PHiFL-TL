@@ -266,7 +266,7 @@ for file_name in os.listdir(path):
 # assigning edges to server 
 for edge in edges:                                   
     server.edgeserver_registering(edge)
-server.model.save(fr".\results\global_models\{folder}\itr_0.h5")
+server.model.save(fr".\results\global_models\itr_0.h5")
 for comm_r in range(communication_round):    
     print(f'===================================={comm_r+1} c_round...start================================================')
     for edge in edges:
