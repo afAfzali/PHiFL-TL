@@ -301,6 +301,7 @@ for comm_r in range(communication_round):
     # begin server aggregation
     for edge in edges:                            
         edge.send_to_server(server)     # server' buffer
+    server.aggregate(comm_r)
     for client in clients:
         acc=client.test_s(server)
         client.acc.append(acc)
