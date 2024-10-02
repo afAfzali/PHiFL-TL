@@ -6,6 +6,7 @@ from tensorflow.keras.datasets import mnist
 from tensorflow.keras.datasets import cifar10
 from tensorflow.keras.utils import to_categorical
 import sys
+import json
 
 def get_dataset(dataset,model):
     if dataset=='mnist':
