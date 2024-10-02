@@ -291,7 +291,7 @@ for comm_r in range(communication_round):
                 edge.send_to_client(clients[index])    
                 print(f"\n--------------------------------> {client_name} be selected:")
                 clients[index].m_compile(loss=loss,optimizer=optimizer,metrics=metrics)     
-                clients[index].local_model_train(epochs,batch_size,verbose,comm_r,num_agg)
+                clients[index].local_model_train(epochs,verbose,comm_r,num_agg)
                 clients[index].send_to_edgeserver(edge)               # buffer                
             edge.aggregate(comm_r,num_agg)
             print(f'************{edge.name}******************end')
