@@ -227,23 +227,21 @@ elif dataset=="femnist":
     clients=[]
     edges=[]
     for i in range(num_clients):
-        client_classes=get_classes(train_partitions[i],num_labels)
-        clients.append(Client(i,train_partitions[i],test_partitions[i],client_classes,dataset,model,loss,metrics,
-                                                     lr,image_shape,latent_dim,num_labels,batch_size))     
+        clients.append(Client(i,train_partitions[i],test_partitions[i],dataset,model,loss,metrics,
+                                                             lr,batch_size,image_shape,val_ratio))     
     assigned_clients_list=random_edges(num_edges,num_clients) 
     for edgeid in range(num_edges):
-        edges.append(Edgeserver(edgeid,assigned_clients_list[edgeid],dataset,image_shape,latent_dim,num_labels))
+        edges.append(Edgeserver(edgeid,assigned_clients_list[edgeid],dataset,model,loss,metrics,lr,image_shape))
         for client_name in assigned_clients_list[edgeid]:               
-            index=int(client_name.split('_')[1])-1                # k-1
-            edges[edgeid].classes_registering(clients[index])
+            index=int(client_name.split('_')[1])-1               
+            edges[edgeid].client_registering(clients[index])
     clients_per_edge=int(num_clients/num_edges)
-    server=Server()   
+    server=Server(dataset,model,loss,metrics,lr,image_shape)  
 
     print(tracemalloc.get_traced_memory()) 
     del train_partitions,test_partitions,assigned_clients_list
     gc.collect()
-    print(tracemalloc.get_traced_memory())
-        
+    print(tracemalloc.get_traced_memory())        
 # =============================================================================================================
 path=fr'.\results\edges_models\\'                     
 for file_name in os.listdir(path):
