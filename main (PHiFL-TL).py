@@ -344,7 +344,7 @@ for edge in edges:
                     c_model.load_weights(file)
                     clients[index].predict(c_model,2)      #2 --> level 2 : client model
                 else:       
-                    clients[index].all_acc.append(clients[index].all_acc[-1])
+                    clients[index].all_acc.append((clients[index].all_acc[-1][0],-1))
                     
                 file=fr'.\results\edges_models\{folder}\itr_{comm_r+1}\agg_{num_agg+1}_{edge.name}.h5'
                 c_model.load_weights(file)
