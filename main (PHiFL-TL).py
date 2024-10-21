@@ -5,8 +5,8 @@ import random
 import os
 import psutil
 import shutil
-os.environ['NUMEXPR_MAX_THREADS'] = '16'
-os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = 'true'
+os.environ['NUMEXPR_MAX_THREADS']='16'
+os.environ['TF_FORCE_GPU_ALLOW_GROWTH']='true'
 import numexpr as ne
 import time
 import matplotlib.pyplot as plt
@@ -26,8 +26,9 @@ from datasets_partitioning.mnist_femnist import iid_equal_size_split
 from datasets_partitioning.mnist_femnist import iid_nequal_size_split
 from datasets_partitioning.mnist_femnist import niid_labeldis_split
 from datasets_partitioning.mnist_femnist import get_clients_femnist_cnn_with_reduce_writers_k_classes
+from datasets_partitioning.mnist_femnist import get_clients_femnist_cnn_with_reduce_writers_k_classes_2
 from tensorflow.keras.models import load_model
-from model.initialize_model import create
+from models.initialize_model import create
 from tensorflow.keras.utils import plot_model,to_categorical
 from plots import client_plot
 
@@ -40,17 +41,18 @@ if gpus:
         for gpu in gpus:
             tf.config.experimental.set_memory_growth(gpu, True)
         logical_gpus = tf.config.list_logical_devices('GPU')
-        print(len(gpus), "Physical GPUs,", len(logical_gpus), "Logical GPUs")
+        print(len(gpus),"Physical GPUs,",len(logical_gpus),"Logical GPUs")
     except RuntimeError as e:
         print(e)
 
-dataset="mnist"
+dataset="mnist"  # define name of dataset : mnist or femnist
 if dataset=='cifar10' or dataset=="mnist":
     num_labels=10
 if dataset=='femnist':
-    num_labels=10   # number classes of 62 classes   # 🔹
-    train_size=21000
-    test_size=9000 
+    num_labels=20   # number classes of 62 classes / for exmaple :20
+    train_size=21000     # define size of train data 
+    test_size=9000       # define size of test data 
+    label_reduce=12      # reduce num_labels -- for non-iid
 model="cnn1"   #or cnn2, cnn3
 batch_size=32
 communication_round=6              
@@ -64,9 +66,9 @@ val_ratio=0.1
 beta=0.5 
 mean=0
 image_shape=(28,28,1)
-loss="categorical_crossentropy"      #optimizer is "Adam"
+loss="categorical_crossentropy"      
 metrics=["accuracy"]
-verbose=0    
+verbose=1    
 seed=4   
 np.random.seed(seed)
 random.seed(seed)
@@ -92,22 +94,21 @@ if dataset!="femnist":
         print('\n** randomly are assigned clients to edgesevers **')
         clients=[]
         edges=[]
-        
         if flag1==1:
             train_partitions,test_partitions=iid_equal_size_split(X_train,Y_train,X_test,Y_test,num_clients)
         else:
             train_partitions,test_partitions=iid_nequal_size_split(X_train,Y_train,X_test,Y_test,num_clients,beta)        
         for i in range(num_clients):
             clients.append(Client(i,train_partitions[i],test_partitions[i],dataset,model,loss,metrics,
-                                                             lr,batch_size,image_shape,val_ratio)) 
+                                                             lr,batch_size,image_shape,val_ratio,num_labels)) 
         assigned_clients_list=random_edges(num_edges,num_clients) 
         for edgeid in range(num_edges):
-            edges.append(Edgeserver(edgeid,assigned_clients_list[edgeid],dataset,model,loss,metrics,lr,image_shape))
+            edges.append(Edgeserver(edgeid,assigned_clients_list[edgeid],dataset,model,loss,metrics,lr,image_shape,num_labels))
             for client_name in assigned_clients_list[edgeid]:               
                 index=int(client_name.split('_')[1])-1               
                 edges[edgeid].client_registering(clients[index])
         clients_per_edge=int(num_clients/num_edges)
-        server=Server(dataset,model,loss,metrics,lr,image_shape)   
+        server=Server(dataset,model,loss,metrics,lr,image_shape,num_labels)   
     
         del X_train,Y_train,X_test,Y_test,train_partitions,test_partitions,assigned_clients_list
         gc.collect()
@@ -133,18 +134,18 @@ if dataset!="femnist":
             assigned_clients=[]
             for i in range(clients_per_edge):
                 clients.append(Client(index,train_partitions[i],test_partitions[i],dataset,model,loss,metrics,
-                                                             lr,batch_size,image_shape,val_ratio))   
+                                                             lr,batch_size,image_shape,val_ratio,num_labels))   
                 assigned_clients.append(index)
                 index+=1
             assigned_clients=list(map(lambda x :f'client_{x+1}',assigned_clients))
-            edges.append(Edgeserver(edgeid,assigned_clients,dataset,model,loss,metrics,lr,image_shape))
+            edges.append(Edgeserver(edgeid,assigned_clients,dataset,model,loss,metrics,lr,image_shape,num_labels))
             for client_name in assigned_clients:                 
                 idx=int(client_name.split('_')[1])-1                
                 edges[edgeid].client_registering(clients[idx])
             for i in range(clients_per_edge):
                 print(f'{edges[edgeid].cnames[i]}')
             print(f'be assigned to {edges[edgeid].name}')
-        server=Server(dataset,model,loss,metrics,lr,image_shape)   
+        server=Server(dataset,model,loss,metrics,lr,image_shape,num_labels)   
         print(tracemalloc.get_traced_memory()) 
         del X_train,X_test,Y_train,Y_test,test_partitions,train_partitions
         gc.collect()  
@@ -171,18 +172,18 @@ if dataset!="femnist":
             assigned_clients=[]
             for i in range(clients_per_edge):
                 clients.append(Client(index,train_party_partitions[i],test_party_partitions[i],dataset,model,loss,metrics,
-                                                             lr,batch_size,image_shape,val_ratio))  
+                                                             lr,batch_size,image_shape,val_ratio,num_labels))  
                 assigned_clients.append(index)
                 index+=1
             assigned_clients=list(map(lambda x :f'client_{x+1}',assigned_clients))
-            edges.append(Edgeserver(edgeid,assigned_clients,dataset,model,loss,metrics,lr,image_shape))
+            edges.append(Edgeserver(edgeid,assigned_clients,dataset,model,loss,metrics,lr,image_shape,num_labels))
             for client_name in assigned_clients:                  
                 idx=int(client_name.split('_')[1])-1                
                 edges[edgeid].client_registering(clients[idx])
             for i in range(clients_per_edge):
                 print(f'{edges[edgeid].cnames[i]}')
             print(f'be assigned to {edges[edgeid].name}')
-        server=Server(dataset,model,loss,metrics,lr,image_shape)   
+        server=Server(dataset,model,loss,metrics,lr,image_shape,num_labels)   
         print(tracemalloc.get_traced_memory()) 
         del X_train,Y_train,X_test,Y_test,train_noisy_edge,test_noisy_edge,train_party_partitions,test_party_partitions
         gc.collect()
@@ -200,18 +201,18 @@ if dataset!="femnist":
             for _ in range(clients_per_edge):
                 #client_classes=get_classes(train_partitions[index])
                 clients.append(Client(index,train_partitions[index],test_partitions[index],dataset,model,loss,metrics,
-                                                             lr,batch_size,image_shape,val_ratio))  
+                                                             lr,batch_size,image_shape,val_ratio,num_labels))  
                 assigned_clients.append(index)
                 index+=1
             assigned_clients=list(map(lambda x :f'client_{x+1}',assigned_clients))
-            edges.append(Edgeserver(edgeid,assigned_clients,dataset,model,loss,metrics,lr,image_shape))
+            edges.append(Edgeserver(edgeid,assigned_clients,dataset,model,loss,metrics,lr,image_shape,num_labels))
             for client_name in assigned_clients:                 
                 idx=int(client_name.split('_')[1])-1               
                 edges[edgeid].client_registering(clients[idx])
             for i in range(clients_per_edge):
                 print(f'{edges[edgeid].cnames[i]}')
             print(f'be assigned to {edges[edgeid].name}')
-        server=Server(dataset,model,loss,metrics,lr,image_shape)   
+        server=Server(dataset,model,loss,metrics,lr,image_shape,num_labels)   
         
         print(tracemalloc.get_traced_memory()) 
         del X_train,Y_train,X_test,Y_test,train_partitions,test_partitions
@@ -221,22 +222,22 @@ if dataset!="femnist":
 elif dataset=="femnist":     
     print('equal size + reducing writers')
     print('\n** randomly are assigned clients to edgesevers **')
-    train_partitions,test_partitions=get_clients_femnist_cnn_with_reduce_writers_k_classes(num_clients,train_size,
-                                                                                           test_size,num_labels)
+    train_partitions,test_partitions=get_clients_femnist_cnn_with_reduce_writers_k_classes_2(num_clients,train_size,
+                                                                              test_size,num_labels,label_reduce)
     print("partitinong ...end !")
     clients=[]
     edges=[]
     for i in range(num_clients):
         clients.append(Client(i,train_partitions[i],test_partitions[i],dataset,model,loss,metrics,
-                                                             lr,batch_size,image_shape,val_ratio))     
+                                                             lr,batch_size,image_shape,val_ratio,num_labels))     
     assigned_clients_list=random_edges(num_edges,num_clients) 
     for edgeid in range(num_edges):
-        edges.append(Edgeserver(edgeid,assigned_clients_list[edgeid],dataset,model,loss,metrics,lr,image_shape))
+        edges.append(Edgeserver(edgeid,assigned_clients_list[edgeid],dataset,model,loss,metrics,lr,image_shape,num_labels))
         for client_name in assigned_clients_list[edgeid]:               
             index=int(client_name.split('_')[1])-1               
             edges[edgeid].client_registering(clients[index])
     clients_per_edge=int(num_clients/num_edges)
-    server=Server(dataset,model,loss,metrics,lr,image_shape)  
+    server=Server(dataset,model,loss,metrics,lr,image_shape,num_labels)  
 
     print(tracemalloc.get_traced_memory()) 
     del train_partitions,test_partitions,assigned_clients_list
@@ -317,11 +318,11 @@ for edge in edges:
         index=int(client_name.split('_')[1])-1
         edge.send_to_client(clients[index])   
 # TL
-if flag1==3:
+if (dataset=='mnist' and flag1==3) or dataset=="femnist":
     for client in clients: 
         for layer in client.model.layers[:-2]:                     
             layer.trainable=False
-        optimizer=tf.keras.optimizers.SGD(learning_rate=0.00001)
+        optimizer=tf.keras.optimizers.SGD(learning_rate=0.00001)  #0.00001 for mnist , 0.001 for femnist
         client.m_compile(loss=loss,optimizer=optimizer,metrics=metrics)
         client.local_model_train(epochs=epochs,batch_size=batch_size,verbose=0)   
         client.test_c()
@@ -329,26 +330,27 @@ if flag1==3:
 for client in clients:
     print(client.name,":",client.acc,"------",client.comm_agg)
 # plots
-c_model=create(dataset,model,loss,metrics,lr,image_shape)
+c_model=create(dataset,model,loss,metrics,lr,image_shape,num_labels)
+folder="non-IID femnist"   # for saving models , ...
 for edge in edges:
     for client_name in edge.cnames:
         index=int(client_name.split('_')[1])-1
         file=fr'.\results\global_models\{folder}\itr_0.h5'
         c_model.load_weights(file)
-        clients[index].predict(c_model,0)            # 0 -->  level 0 : sever model
+        clients[index].predict(c_model,0)            # 0 -->  global knowledge
         for comm_r in range(communication_round):
             
             for num_agg in range(num_edge_aggregation):
                 file=fr'.\results\edges_models\{folder}\comm_{comm_r+1}_agg_{num_agg+1}_{client_name}.h5'
                 if os.path.isfile(file):
                     c_model.load_weights(file)
-                    clients[index].predict(c_model,2)      #2 --> level 2 : client model
+                    clients[index].predict(c_model,2)      #2 --> local training
                 else:       
                     clients[index].all_acc.append((clients[index].all_acc[-1][0],-1))
                     
                 file=fr'.\results\edges_models\{folder}\itr_{comm_r+1}\agg_{num_agg+1}_{edge.name}.h5'
                 c_model.load_weights(file)
-                clients[index].predict(c_model,1)            # 1 --> level 1 : edge model 
+                clients[index].predict(c_model,1)            # 1 --> community knowledge 
                 
             file=fr'.\results\global_models\{folder}\itr_{comm_r+1}.h5'
             c_model.load_weights(file)
