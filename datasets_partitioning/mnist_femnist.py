@@ -268,7 +268,7 @@ def Gaussian_noise(train_data,test_data,original_std,idx,num_parties,mean):
         noisy_test_list.append(test_noisy_data)
     return np.array(noisy_train_list),np.array(noisy_test_list)
     
-def get_clients_femnist_cnn_with_reduce_writers_k_classes(num_parties,train_size,test_size,number_classes):    # ok
+def get_clients_femnist_cnn_with_reduce_writers_k_classes(num_parties,train_size,test_size,number_classes):    
     num_train_samples_party=int(train_size/num_parties)
     num_test_samples_party=int(test_size/num_parties)
     train_test_ratio=num_train_samples_party/num_test_samples_party
