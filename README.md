@@ -34,7 +34,7 @@ Implementation of the algorithm presented in the paper titled "PHiFL-TL: Persona
         val_ratio=0.1     
         image_shape=(28,28,1)
   
-  * Here is one example to run this code (non-IID FEMNIST Scenario):
+* Here is one example to run this code (non-IID FEMNIST Scenario):
   
         dataset="femnist"
         num_labels=20   # number classes of 62 classes  
