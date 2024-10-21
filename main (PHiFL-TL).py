@@ -317,7 +317,8 @@ for edge in edges:
     for client_name in edge.cnames:
         index=int(client_name.split('_')[1])-1
         edge.send_to_client(clients[index])   
-# TL
+        
+# TL -----------------------------------------------------------------------
 if (dataset=='mnist' and flag1==3) or dataset=="femnist":
     for client in clients: 
         for layer in client.model.layers[:-2]:                     
@@ -329,7 +330,8 @@ if (dataset=='mnist' and flag1==3) or dataset=="femnist":
 # acc report (without personalized,with personalized)               
 for client in clients:
     print(client.name,":",client.acc,"------",client.comm_agg)
-# plots
+    
+# plots -----------------------------------------------------------------------
 c_model=create(dataset,model,loss,metrics,lr,image_shape,num_labels)
 folder="non-IID femnist"   # for saving models , ...
 for edge in edges:
@@ -357,6 +359,7 @@ for edge in edges:
             clients[index].predict(c_model,0)
 for client in clients:
     client_plot(client,folder) 
-# report
+    
+# report ----------------------------------------------------------------
 for client in clients:
     print(client.name ,"--", "local :",client.all_acc[1] , "/" , "fed :" ,client.all_acc[-1])
