@@ -12,9 +12,10 @@ Implementation of the algorithm presented in the paper titled "PHiFL-TL: Persona
         num_edges=3   
         num_clients=30 
         fraction_clients=0.5              
-        lr=0.01
+        lr=0.01      
         val_ratio=0.1     
         image_shape=(28,28,1)
+        lr=0.00001      # for Transfer learning phase
         
 * Here is one example to run this code (non-IID MNIST Scenario):
   
@@ -33,6 +34,7 @@ Implementation of the algorithm presented in the paper titled "PHiFL-TL: Persona
         lr=0.01
         val_ratio=0.1     
         image_shape=(28,28,1)
+        lr=0.00001      # for Transfer learning phase
   
 * Here is one example to run this code (non-IID FEMNIST Scenario):
   
@@ -52,6 +54,7 @@ Implementation of the algorithm presented in the paper titled "PHiFL-TL: Persona
         lr=0.01
         val_ratio=0.25     
         image_shape=(28,28,1)
+        lr=0.001      # for Transfer learning phase
   
 **Notice:**
   You need to create the following folders where the program is located: `results\global_models`, `results\edges_models\itr_i` (i : 1 to communication_round) and `results\fig`.
