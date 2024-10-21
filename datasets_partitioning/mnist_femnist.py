@@ -169,7 +169,6 @@ def niid_labeldis_split(train_data,train_label,test_data,test_label,num_clients,
 
 """         label distribution skew -->  quantity-based label imbalanced      """    
 def k_niid_equal_size_split(train_data,train_label,test_data,test_label,num_parties,labels_list,k,flag=None): 
-    # k: number of lables for each party
     labels_index=np.arange(len(labels_list))
     times=[0]*len(labels_list) 
     party_labels_list=[] 
@@ -250,7 +249,7 @@ def k_niid_equal_size_split(train_data,train_label,test_data,test_label,num_part
             te_label[i]=test_label[test_partition_idxs[i]]
         return tr_data,tr_label,te_data,te_label,party_labels_list
         
-def Gaussian_noise(train_data,test_data,original_std,idx,num_parties,mean=0):
+def Gaussian_noise(train_data,test_data,original_std,idx,num_parties,mean):
     """
     for party idx :std = original_std*(idx/num_parties)
     image data and noisy_image_data must be scaled in [0, 1] 
@@ -269,6 +268,195 @@ def Gaussian_noise(train_data,test_data,original_std,idx,num_parties,mean=0):
         noisy_test_list.append(test_noisy_data)
     return np.array(noisy_train_list),np.array(noisy_test_list)
     
+def get_clients_femnist_cnn_with_reduce_writers_k_classes(num_parties,train_size,test_size,number_classes):    # ok
+    num_train_samples_party=int(train_size/num_parties)
+    num_test_samples_party=int(test_size/num_parties)
+    train_test_ratio=num_train_samples_party/num_test_samples_party
+    train_partitions=[0]*num_parties
+    test_partitions=[0]*num_parties
+    for i in range(num_parties):
+        num_test_samples_party=int(test_size/num_parties)
+        print(i,":")
+        with open(fr'.\LEAF\train\all_data_{i}_niid_0_keep_0_train_9.json') as f_in:
+            r1=json.load(f_in)  
+        with open(fr'.\LEAF\test\all_data_{i}_niid_0_keep_0_test_9.json') as f_in:
+            r2=json.load(f_in) 
+        X_train=[]
+        Y_train=[]
+        X_test=[]
+        Y_test=[]
+        for (_,v1),(_,v2) in zip(r1["user_data"].items() ,r2["user_data"].items()):
+            if num_test_samples_party!=0:
+                l1=[0]*number_classes
+                l2=[0]*number_classes
+                zero_indices = []
+                idxs=[]
+                for j1 in v1["y"]:
+                    if j1 in list(range(number_classes)):
+                        l1[j1]+=1
+                for idx, value in enumerate(l1):
+                    if value == 0:
+                        zero_indices.append(idx)
+                for j2 in v2["y"]:
+                    if j2 in list(range(number_classes)):
+                        l2[j2]+=1
+                for idx, value in enumerate(l2):
+                    if value == 0:
+                        zero_indices.append(idx)
+                rest_labels=list(set(list(range(number_classes)))-set(zero_indices))
+                train_labels_frequency=[0]*len(rest_labels)
+                test_labels_frequency=[0]*len(rest_labels)
+                for idx in range(len(rest_labels)):
+                    train_labels_frequency[idx]=l1[rest_labels[idx]]
+                    test_labels_frequency[idx]=l2[rest_labels[idx]]
+                selected_labels=[]
+                for idx in range(len(rest_labels)):
+                    if num_test_samples_party-test_labels_frequency[idx]>=0:
+                        if train_labels_frequency[idx]>=int(train_test_ratio*test_labels_frequency[idx]):
+                            selected_labels.append(rest_labels[idx])
+                            num_test_samples_party-=test_labels_frequency[idx]
+                        else:
+                            selected_labels.append(-1)
+                    else:
+                        break 
+                train_idxs=[]
+                for label in selected_labels:
+                    if label!=-1:
+                        idx_l=[]
+                        for j,d in enumerate(v1["y"]):
+                            if label==d:
+                                idx_l.append(j)
+                        selected_idxs=np.random.choice(idx_l,int(test_labels_frequency[selected_labels.index(label)]*train_test_ratio),
+                                                                   replace=False)
+                        train_idxs.extend(selected_idxs)
+                X_train.extend(np.array(v1["x"])[train_idxs])        
+                Y_train.extend(np.array(v1["y"])[train_idxs])
+
+                test_idxs=[]
+                for label in selected_labels:
+                    if label!=-1:
+                        idx_l=[]
+                        for j,d in enumerate(v2["y"]):
+                            if label==d:
+                                idx_l.append(j)
+                        selected_idxs=np.random.choice(idx_l,test_labels_frequency[selected_labels.index(label)],replace=False)
+                        test_idxs.extend(selected_idxs)
+                X_test.extend(np.array(v2["x"])[test_idxs])
+                Y_test.extend(np.array(v2["y"])[test_idxs])
+            else:
+                break
+
+        X_train=np.array(X_train)
+        X_train=X_train.reshape(X_train.shape[0],28,28,1).astype('float32')
+        Y_train=np.array(Y_train)
+        Y_train=to_categorical(Y_train,number_classes)
+        X_test=np.array(X_test)
+        X_test=X_test.reshape(X_test.shape[0],28,28,1).astype('float32')
+        Y_test=np.array(Y_test)
+        Y_test=to_categorical(Y_test,number_classes)
+        train_partitions[i]=tf.data.Dataset.from_tensor_slices((X_train,Y_train))
+        test_partitions[i]=tf.data.Dataset.from_tensor_slices((X_test,Y_test))
+        del X_train,Y_train,X_test,Y_test
+        gc.collect()
+    return train_partitions,test_partitions
+
+def get_clients_femnist_cnn_with_reduce_writers_k_classes_2(num_parties,train_size,test_size,number_classes,label_reduce):  
+    num_train_samples_party=int(train_size/num_parties)
+    num_test_samples_party=int(test_size/num_parties)
+    train_test_ratio=num_train_samples_party/num_test_samples_party
+    train_partitions=[0]*num_parties
+    test_partitions=[0]*num_parties
+    for i in range(num_parties):
+        num_test_samples_party=int(test_size/num_parties)
+        print(i,":")
+        with open(fr'.\LEAF\train\all_data_{i}_niid_0_keep_0_train_9.json') as f_in:
+            r1=json.load(f_in)  
+        with open(fr'.\LEAF\test\all_data_{i}_niid_0_keep_0_test_9.json') as f_in:
+            r2=json.load(f_in) 
+        X_train=[]
+        Y_train=[]
+        X_test=[]
+        Y_test=[]
+
+        new_classes=list(np.random.choice(range(number_classes),label_reduce,replace=False))
+        for (_,v1),(_,v2) in zip(r1["user_data"].items() ,r2["user_data"].items()):
+            if num_test_samples_party!=0:
+                l1=[0]*number_classes
+                l2=[0]*number_classes
+                zero_indices = []
+                idxs=[]
+                for j1 in v1["y"]:
+                    if j1 in new_classes:
+                        l1[j1]+=1
+                for idx, value in enumerate(l1):
+                    if value == 0:
+                        zero_indices.append(idx)
+                for j2 in v2["y"]:
+                    if j2 in new_classes:
+                        l2[j2]+=1
+                for idx, value in enumerate(l2):
+                    if value == 0:
+                        zero_indices.append(idx)   
+                rest_labels=list(set(new_classes)-set(zero_indices))
+                train_labels_frequency=[0]*len(rest_labels)
+                test_labels_frequency=[0]*len(rest_labels)
+                for idx in range(len(rest_labels)):
+                    train_labels_frequency[idx]=l1[rest_labels[idx]]
+                    test_labels_frequency[idx]=l2[rest_labels[idx]]
+                selected_labels=[]
+                for idx in range(len(rest_labels)):
+                    if num_test_samples_party-test_labels_frequency[idx]>=0:
+                        if train_labels_frequency[idx]>=int(train_test_ratio*test_labels_frequency[idx]):
+                            selected_labels.append(rest_labels[idx])
+                            num_test_samples_party-=test_labels_frequency[idx]
+                        else:
+                            selected_labels.append(-1)
+                    else:
+                        break 
+                train_idxs=[]
+                for label in selected_labels:
+                    if label!=-1:
+                        idx_l=[]
+                        for j,d in enumerate(v1["y"]):
+                            if label==d:
+                                idx_l.append(j)
+                        selected_idxs=np.random.choice(idx_l,int(test_labels_frequency[selected_labels.index(label)]*train_test_ratio),
+                                                                   replace=False)
+                        train_idxs.extend(selected_idxs)
+                X_train.extend(np.array(v1["x"])[train_idxs])        
+                Y_train.extend(np.array(v1["y"])[train_idxs])
+                test_idxs=[]
+                for label in selected_labels:
+                    if label!=-1:
+                        idx_l=[]
+                        for j,d in enumerate(v2["y"]):
+                            if label==d:
+                                idx_l.append(j)
+
+                        selected_idxs=np.random.choice(idx_l,test_labels_frequency[selected_labels.index(label)],replace=False)
+                        test_idxs.extend(selected_idxs)
+                X_test.extend(np.array(v2["x"])[test_idxs])
+                Y_test.extend(np.array(v2["y"])[test_idxs])
+
+            else:
+                break
+
+        X_train=np.array(X_train)
+        X_train=X_train.reshape(X_train.shape[0],28,28,1).astype('float32')
+        Y_train=np.array(Y_train)
+        Y_train=to_categorical(Y_train,number_classes)
+        X_test=np.array(X_test)
+        X_test=X_test.reshape(X_test.shape[0],28,28,1).astype('float32')
+        Y_test=np.array(Y_test)
+        Y_test=to_categorical(Y_test,number_classes)
+        train_partitions[i]=tf.data.Dataset.from_tensor_slices((X_train,Y_train))
+        test_partitions[i]=tf.data.Dataset.from_tensor_slices((X_test,Y_test))
+        del X_train,Y_train,X_test,Y_test
+        gc.collect()
+        
+    return train_partitions,test_partitions
+
+
 def random_edges(num_edges,num_clients):
     #randomly select clientsfor assign clients to edgesever 
     clients_per_edge=int(num_clients/num_edges)
