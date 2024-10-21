@@ -33,8 +33,6 @@ from tensorflow.keras.utils import plot_model,to_categorical
 from plots import client_plot
 
 # =============================================================================================================
-#                                                Partitioning                
-# =============================================================================================================
 gpus = tf.config.list_physical_devices('GPU')
 if gpus:
     try:
@@ -262,8 +260,9 @@ path=fr'.\results\fig\\'
 for file_name in os.listdir(path):
     file=path+file_name
     if os.path.isfile(file):
-        os.remove(file)                   
+        os.remove(file)   
         
+ # =============================================================================================================
 # assigning edges to server 
 for edge in edges:                                   
     server.edgeserver_registering(edge)
