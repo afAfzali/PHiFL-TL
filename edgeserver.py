@@ -1,19 +1,19 @@
 from average import average_weights
-from model.initialize_model import create
+from models.initialize_model import create
 import numpy as np 
 import tensorflow as tf 
 from tensorflow.keras.utils import to_categorical
 
 
 class Edgeserver:          
-    def __init__(self,id_name,cnames,dataset,model,loss,metrics,lr,image_shape):         
+    def __init__(self,id_name,cnames,dataset,model,loss,metrics,lr,image_shape,num_labels):         
         
         n='edgeserver'
         self.name=f'{n}_{id_name+1}'
         self.cnames=cnames
         self.buffer={}
         self.participated_sample={}
-        self.model=create(dataset,model,loss,metrics,lr,image_shape) 
+        self.model=create(dataset,model,loss,metrics,lr,image_shape,num_labels) 
         self.test_avg_acc=[]                           
         
     def aggregate(self,comm_r,num_agg):
@@ -40,7 +40,7 @@ class Edgeserver:
         self.participated_sample.clear()
                 
     def client_registering(self,client):    
-        self.participated_sample[client.name] = client.train_num
+        self.participated_sample[client.name]=client.train_num
        
     def m_compile(self,loss,optimizer,metrics):    
         self.model.compile(loss=loss,optimizer=optimizer,metrics=metrics)
