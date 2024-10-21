@@ -1,12 +1,12 @@
 import numpy as np
-from model.initialize_model import create    
+from models.initialize_model import create    
 import tensorflow as tf 
 from tensorflow.keras.callbacks import ModelCheckpoint,EarlyStopping
 
 class Client:    
 
     def __init__(self,id_client,train_partition,test_partition,dataset,model,loss,metrics,lr,
-                                                       batch_size,image_shape,val_ratio):
+                                                       batch_size,image_shape,val_ratio,num_labels):
 
         n='client'
         self.name=f'{n}_{id_client+1}'
@@ -19,7 +19,7 @@ class Client:
         self.train=train_partition.skip(val_size).batch(batch_size,drop_remainder=True)
         self.test=test_partition.batch(32)
         
-        self.model=create(dataset,model,loss,metrics,lr,image_shape)     # includes build and compile
+        self.model=create(dataset,model,loss,metrics,lr,image_shape,num_labels)     # includes build and compile
         self.train_num=self.train.cardinality().numpy()
         self.test_num=self.test.cardinality().numpy()
         self.val_num=self.val.cardinality().numpy()
@@ -39,18 +39,19 @@ class Client:
     def send_to_edgeserver (self,edgeserver): 
         edgeserver.buffer[self.name]=self.model.get_weights()
         
-    def test(self):       
-        _,acc=self.model.evaluate(self.test)  
-        return np.round(acc,2)
-   
+    def test_c(self):       
+        _,acc=self.model.evaluate(self.test,verbose=0)  
+        acc=np.round(acc,2)
+        self.acc.append(acc)
+        
     def m_compile(self,loss,optimizer,metrics):
         self.model.compile(loss=loss,optimizer=optimizer,metrics=metrics)
     
     def test_s(self,server):
-        _,acc=server.model.evaluate(self.test)   
+        _,acc=server.model.evaluate(self.test,verbose=0)   
         return np.round(acc,2)
         
     def predict(self,model,flag):                  
-        _,acc=model.evaluate(self.test)   
+        _,acc=model.evaluate(self.test,verbose=0)   
         acc=np.round(acc,2)
         self.all_acc.append((acc,flag))
