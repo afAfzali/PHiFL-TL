@@ -1,14 +1,14 @@
 from average import average_weights
-from model.initialize_model import create
+from models.initialize_model import create
 import tensorflow as tf
 
 
 class Server:
     
-    def __init__(self,dataset,model,loss,metrics,lr,image_shape):     
+    def __init__(self,dataset,model,loss,metrics,lr,image_shape,num_labels):     
         self.buffer={}
         self.participated_sample = {}                      
-        self.model=create(dataset,model,loss,metrics,lr,image_shape)  
+        self.model=create(dataset,model,loss,metrics,lr,image_shape,num_labels)  
         self.test_avg_acc=[]                                 
     
     def aggregate(self,comm_r):
@@ -32,7 +32,7 @@ class Server:
         for i in edgeserver.participated_sample.values():
             sample_num.append(i)
         all_sample_num=sum(sample_num)
-        self.participated_sample[edgeserver.name] = all_sample_num
+        self.participated_sample[edgeserver.name]=all_sample_num
         
     def m_compile(self,loss,optimizer,metrics):
         self.model.compile(loss=loss,optimizer=optimizer,metrics=metrics)
