@@ -1,7 +1,7 @@
-from model.mlp import SimpleMLP
-from model.cnn import CNN_1
-from model.cnn import CNN_2
-from model.cnn import CNN_3
+from models.mlp import SimpleMLP
+from models.cnn import CNN_1
+from models.cnn import CNN_2
+from models.cnn import CNN_3
 
 def create(dataset,model,loss,metrics,lr,image_shape,num_labels):  
     
