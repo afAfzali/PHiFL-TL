@@ -63,15 +63,15 @@ Citation
 --
 If you find this repository useful, please cite our paper:
 
-@article{afzali2024phifl,
-  title={PHiFL-TL: Personalized Hierarchical Federated Learning using Transfer Learning},
-  author={Afzali, Afsaneh and Shamsinejadbabaki, Pirooz},
-  journal={Future Generation Computer Systems},
-  pages={107672},
-  year={2024},
-  publisher={Elsevier},
-  doi={10.1016/j.future.2024.107672},
-}
+    @article{afzali2024phifl,
+      title={PHiFL-TL: Personalized Hierarchical Federated Learning using Transfer Learning},
+      author={Afzali, Afsaneh and Shamsinejadbabaki, Pirooz},
+      journal={Future Generation Computer Systems},
+      pages={107672},
+      year={2024},
+      publisher={Elsevier},
+      doi={10.1016/j.future.2024.107672},
+    }
 
 
 
