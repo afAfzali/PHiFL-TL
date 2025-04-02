@@ -251,7 +251,7 @@ path=fr'.\results\edges_models\\'
 for file_name in os.listdir(path):
     file=path+file_name
     shutil.rmtree(file)
-path=fr'.\results\global_models}\\'                    
+path=fr'.\results\global_models\\'                    
 for file_name in os.listdir(path):
     file=path+file_name
     if os.path.isfile(file):
