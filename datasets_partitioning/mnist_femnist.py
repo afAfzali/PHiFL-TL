@@ -140,7 +140,7 @@ def niid_labeldis_split(train_data,train_label,test_data,test_label,num_clients,
     # The size of the local data set is not equal
     num_labels=10 
     train_num_samples=len(train_data)
-    train_i=np.array([np.argmax(train_data[idx][1]) for idx in range(len(train_data))])
+    train_i=np.array([np.argmax(train_label[idx]) for idx in range(len(train_label))])
     train_partitions=[0]*num_clients
     train_partitions_idxs=[[] for _ in range(num_clients)]
     for k in range(num_labels):
