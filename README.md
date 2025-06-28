@@ -1,3 +1,13 @@
+![Uploading image.png…]()
+
+
+
+
+
+
+
+
+
 Implementation of the algorithm presented in the paper titled "PHiFL-TL: Personalized Hierarchical Federated Learning using Transfer Learning" with Tensorflow.
 --
 * Here is one example to run this code (IID MNIST Scenario):
