@@ -1,16 +1,5 @@
 Implementation of the algorithm presented in the paper titled "PHiFL-TL: Personalized Hierarchical Federated Learning using Transfer Learning" with Tensorflow.
 --
-
-
-
-
-PHiFL-TL framework overview.
-Phase global learning: (0) Cloud server broadcasts the weights of global model to all edges. (1) Edge broadcasts the model to its active clients. (2) Client trains its model locally, then sends the resulting weights to the corresponding edge, and edge aggregates the models received from its clients (steps 1 and 2 repeat N_agg). (3) Edge sends the resulting weights to cloud server. (4) Cloud server aggregates the models received from the edges, then broadcasts the resulting weights to all edges (steps 1 to 4 repeat N_rounds).
-Phase personalization: (5) Edge broadcasts the global model received from the cloud server to its all clients. (6) Each client tunes the global model using its local dataset, resulting in a personalized model.
-
-
-
-
 * Here is one example to run this code (IID MNIST Scenario):
   
         dataset="mnist"
