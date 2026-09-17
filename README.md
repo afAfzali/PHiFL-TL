@@ -1,5 +1,4 @@
 ## Implementation of the algorithm presented in the paper titled "PHiFL-TL: Personalized Hierarchical Federated Learning using Transfer Learning" with Tensorflow.
------
 
 * Afsaneh Afzali (af.afzali@sutech.ac.ir)
 * Pirooz Shamsinejadbabaki (p.shamsinejad@sutech.ac.ir)
