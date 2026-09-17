@@ -1,5 +1,8 @@
 ## Implementation of the algorithm presented in the paper titled "PHiFL-TL: Personalized Hierarchical Federated Learning using Transfer Learning" with Tensorflow.
 
+This repository contains the official source code for the paper: "PHiFL-TL: Personalized Hierarchical Federated Learning using Transfer Learning".
+
+Authored by:
 * Afsaneh Afzali (af.afzali@sutech.ac.ir)
 * Pirooz Shamsinejadbabaki (p.shamsinejad@sutech.ac.ir)
 
