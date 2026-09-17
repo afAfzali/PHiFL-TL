@@ -3,6 +3,8 @@ Implementation of the algorithm presented in the paper titled "PHiFL-TL: Persona
 
 * Afsaneh Afzali (af.afzali@sutech.ac.ir)
 * Pirooz Shamsinejadbabaki (p.shamsinejad@sutech.ac.ir)
+
+  
 --
 
 * Here is one example to run this code (IID MNIST Scenario):
