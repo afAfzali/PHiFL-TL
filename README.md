@@ -5,7 +5,7 @@ Implementation of the algorithm presented in the paper titled "PHiFL-TL: Persona
 * Pirooz Shamsinejadbabaki (p.shamsinejad@sutech.ac.ir)
 
   
---
+---
 
 * Here is one example to run this code (IID MNIST Scenario):
   
